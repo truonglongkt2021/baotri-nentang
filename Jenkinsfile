@@ -54,7 +54,7 @@ logfile = /var/log/odoo/odoo.log
         sh '''
           docker rm -f $CONTAINER_NAME || true && docker run -d \
             --name $CONTAINER_NAME \
-            -p 8069:8069 \
+            -p 8068:8069 \
             -v "$WORKSPACE/odoo.conf:/opt/odoo" \
             $IMAGE_NAME
         '''
