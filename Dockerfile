@@ -22,6 +22,9 @@ COPY . /opt/odoo
 # Nâng cấp pip và cài requirements
 RUN pip install --upgrade pip && pip install -r requirements.txt
 
+USER root
+RUN mkdir -p /etc/odoo && chown odoo:odoo /etc/odoo
+
 USER odoo
 
 CMD ["python", "odoo-bin", "-c", "/etc/odoo/odoo.conf"]
