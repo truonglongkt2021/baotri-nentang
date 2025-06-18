@@ -52,10 +52,11 @@ logfile = /var/log/odoo/odoo.log
       steps {
         echo "🚀 Deploy container"
         sh '''
-          docker rm -f $CONTAINER_NAME || true && docker run -d \
+          docker rm -f $CONTAINER_NAME || true
+          docker run -d \
             --name $CONTAINER_NAME \
             -p 8068:8069 \
-            -v "$WORKSPACE/odoo.conf:/opt/odoo" \
+            -v "$WORKSPACE/odoo.conf:/etc/odoo/odoo.conf" \
             $IMAGE_NAME
         '''
       }
