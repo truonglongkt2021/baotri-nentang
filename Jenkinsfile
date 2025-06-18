@@ -5,8 +5,8 @@ pipeline {
     IMAGE_NAME = 'odoo-custom:latest'
     CONTAINER_NAME = 'odoo_app_jenkins'
 
-    // Database info
-    DB_HOST = '172.17.0.1'          // host máy thật nếu dùng docker đơn lẻ
+    // Thông tin database
+    DB_HOST = '172.17.0.1'           // hoặc host.docker.internal nếu trên Windows/macOS
     DB_PORT = '25432'
     DB_USER = 'odoo_test'
     DB_NAME = 'odoo_test3'
@@ -18,20 +18,20 @@ pipeline {
     stage('Start PostgreSQL') {
       steps {
         echo "🚀 Tạo PostgreSQL container cho Odoo"
-        sh '''
+        sh """
           docker rm -f pg_odoo_jenkins || true
 
           docker run -d \
             --name pg_odoo_jenkins \
-            -e POSTGRES_USER=odoo_test \
-            -e POSTGRES_PASSWORD=secret123 \
-            -e POSTGRES_DB=odoo_test3 \
-            -p 25432:5432 \
+            -e POSTGRES_USER=${DB_USER} \
+            -e POSTGRES_PASSWORD=${DB_PASSWORD} \
+            -e POSTGRES_DB=${DB_NAME} \
+            -p ${DB_PORT}:5432 \
             postgres:14
 
           echo "⏳ Đợi PostgreSQL khởi động"
           sleep 10
-        '''
+        """
       }
     }
 
@@ -69,14 +69,15 @@ logfile = /var/log/odoo/odoo.log
     stage('Deploy Odoo Container') {
       steps {
         echo "🚀 Deploy container Odoo"
-        sh '''
-          docker rm -f $CONTAINER_NAME || true
+        sh """
+          docker rm -f ${CONTAINER_NAME} || true
+
           docker run -d \
-            --name $CONTAINER_NAME \
+            --name ${CONTAINER_NAME} \
             -p 8069:8069 \
             -v "$WORKSPACE/odoo.conf:/etc/odoo/odoo.conf" \
-            $IMAGE_NAME
-        '''
+            ${IMAGE_NAME}
+        """
       }
     }
   }
