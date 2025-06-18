@@ -5,7 +5,7 @@ pipeline {
     IMAGE_NAME = 'odoo-custom:latest'
     CONTAINER_NAME = 'odoo_app_jenkins'
 
-    // 👉 Các biến được tạo từ Jenkins Credentials hoặc hardcoded (tùy bạn)
+    // 👉 Các biến được tạo từ Jenkins Credentials hoặc hardcoded 
     DB_HOST = '103.48.193.165'
     DB_PORT = '15432'
     DB_USER = 'odoo-test'
