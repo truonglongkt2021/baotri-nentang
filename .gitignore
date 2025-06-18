@@ -1,0 +1,34 @@
+# Loại trừ Odoo core và module gốc
+/odoo/
+/addons/
+/debian/
+/doc/
+/setup/
+/.tx/
+/.github/
+
+# Python cache
+__pycache__/
+*.py[cod]
+*.so
+
+# Môi trường ảo & dotenv
+venv/
+.env
+
+# IDE/editor
+.vscode/
+.idea/
+
+# File build
+*.egg-info/
+*.log
+*.db
+*.zip
+*.tar.gz
+
+# Tạm thời
+*.swp
+*.bak
+*.tmp
+.test
