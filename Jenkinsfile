@@ -5,14 +5,14 @@ pipeline {
     IMAGE_NAME = 'odoo-custom:latest'
     CONTAINER_NAME = 'odoo_app_jenkins'
 
-    // 👉 Các biến được tạo từ Jenkins Credentials hoặc hardcoded 
+    // Thông tin DB
     DB_HOST = '103.48.193.165'
     DB_PORT = '15432'
     DB_USER = 'odoo-test'
     DB_NAME = 'odoo-test3'
 
-    // Dùng Jenkins credentials
-    DB_PASSWORD = credentials('jenkins-db-pass')  // 📌 tạo trong Jenkins jenkin
+    // Jenkins credentials
+    DB_PASSWORD = credentials('jenkins-db-pass')
     ADMIN_PASSWD = credentials('jenkins-admin-pass')
   }
 
@@ -26,7 +26,7 @@ pipeline {
 
     stage('Generate odoo.conf') {
       steps {
-        echo "⚙️ Tạo file odoo.conf từ template"
+        echo "⚙️ Tạo file odoo.conf"
         writeFile file: 'odoo.conf', text: """
 [options]
 addons_path = addons
@@ -44,21 +44,21 @@ logfile = /var/log/odoo/odoo.log
     stage('Build Docker Image') {
       steps {
         echo "🐳 Build image Odoo"
-        sh "docker build -t $IMAGE_NAME ."
+        sh "docker build -t ${IMAGE_NAME} ."
       }
     }
 
     stage('Deploy Container') {
       steps {
-        echo "🚀 Deploy container Odoo"
-        sh """
+        echo "🚀 Deploy container"
+        sh '''
           docker rm -f $CONTAINER_NAME || true
-          docker run -d \\
-            --name $CONTAINER_NAME \\
-            -p 8069:8069 \\
-            -v \$(pwd)/odoo.conf:/opt/odoo/odoo.conf \\
+          docker run -d \
+            --name $CONTAINER_NAME \
+            -p 8069:8069 \
+            -v "$WORKSPACE/odoo.conf:/opt/odoo/odoo.conf" \
             $IMAGE_NAME
-        """
+        '''
       }
     }
   }
