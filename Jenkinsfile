@@ -52,8 +52,7 @@ logfile = /var/log/odoo/odoo.log
       steps {
         echo "🚀 Deploy container"
         sh '''
-          docker rm -f $CONTAINER_NAME || true
-          docker run -d \
+          docker rm -f $CONTAINER_NAME || true && docker run -d \
             --name $CONTAINER_NAME \
             -p 8069:8069 \
             -v "$WORKSPACE/odoo.conf:/opt/odoo/odoo.conf" \
