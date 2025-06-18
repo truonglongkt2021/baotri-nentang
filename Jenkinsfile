@@ -12,7 +12,7 @@ pipeline {
     DB_NAME = 'odoo-test3'
 
     // Dùng Jenkins credentials
-    DB_PASSWORD = credentials('jenkins-db-pass')  // 📌 tạo trong Jenkins
+    DB_PASSWORD = credentials('jenkins-db-pass')  // 📌 tạo trong Jenkins jenkin
     ADMIN_PASSWD = credentials('jenkins-admin-pass')
   }
 
