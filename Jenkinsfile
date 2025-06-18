@@ -6,7 +6,7 @@ pipeline {
     CONTAINER_NAME = 'odoo_app_jenkins'
 
     // Thông tin database
-    DB_HOST = '172.17.0.1'           // hoặc host.docker.internal nếu trên Windows/macOS
+    DB_HOST = '172.17.0.1'           // hoặc host.docker.internal nếu dùng Docker Desktop
     DB_PORT = '25432'
     DB_USER = 'odoo_test'
     DB_NAME = 'odoo_test3'
@@ -17,7 +17,7 @@ pipeline {
   stages {
     stage('Start PostgreSQL') {
       steps {
-        echo "🚀 Tạo PostgreSQL container cho Odoo"
+        echo "🚀 Tạo container PostgreSQL cho Odoo"
         sh """
           docker rm -f pg_odoo_jenkins || true
 
@@ -44,8 +44,8 @@ pipeline {
 
     stage('Generate odoo.conf') {
       steps {
-        echo "⚙️ Tạo file odoo.conf"
-        writeFile file: 'odoo.conf', text: """
+        echo "⚙️ Tạo file odoo_config.ini"
+        writeFile file: 'odoo_config.ini', text: """
 [options]
 addons_path = addons
 admin_passwd = ${ADMIN_PASSWD}
@@ -75,7 +75,7 @@ logfile = /var/log/odoo/odoo.log
           docker run -d \
             --name ${CONTAINER_NAME} \
             -p 8069:8069 \
-            -v "$WORKSPACE/odoo.conf:/etc/odoo/odoo.conf" \
+            -v "$WORKSPACE/odoo_config.ini:/etc/odoo/odoo.conf" \
             ${IMAGE_NAME}
         """
       }
