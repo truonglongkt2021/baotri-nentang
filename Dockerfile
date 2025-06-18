@@ -24,4 +24,4 @@ RUN pip install --upgrade pip && pip install -r requirements.txt
 
 USER odoo
 
-CMD ["python", "odoo-bin", "-c", "/opt/odoo/odoo.conf"]
+CMD ["python", "odoo-bin", "-c", "/etc/odoo/odoo.conf"]
