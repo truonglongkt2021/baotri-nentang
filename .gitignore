@@ -1,6 +1,4 @@
 # Loại trừ Odoo core và module gốc
-/odoo/
-/addons/
 /debian/
 /doc/
 /setup/
