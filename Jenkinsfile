@@ -4,9 +4,10 @@ pipeline {
   environment {
     IMAGE_NAME = 'odoo-custom:latest'
     CONTAINER_NAME = 'odoo_app_jenkins'
+    NETWORK_NAME = 'odoo_net_jenkin'
 
-    DB_HOST = '172.17.0.1'
-    DB_PORT = '25432'
+    DB_HOST = 'pg_odoo_jenkins' // 👉 Truy cập bằng tên container
+    DB_PORT = '5432'
     DB_USER = 'odoo_test'
     DB_NAME = 'odoo_test3'
     DB_PASSWORD = credentials('jenkins-db-pass')
@@ -14,18 +15,23 @@ pipeline {
   }
 
   stages {
+    stage('Create Docker Network') {
+      steps {
+        sh "docker network create ${NETWORK_NAME} || true"
+      }
+    }
+
     stage('Start PostgreSQL') {
       steps {
         sh """
           docker rm -f pg_odoo_jenkins || true
           docker run -d \
             --name pg_odoo_jenkins \
+            --network ${NETWORK_NAME} \
             -e POSTGRES_USER=${DB_USER} \
             -e POSTGRES_PASSWORD=${DB_PASSWORD} \
             -e POSTGRES_DB=${DB_NAME} \
-            -p ${DB_PORT}:5432 \
             postgres:14
-          sleep 10
         """
       }
     }
@@ -48,6 +54,7 @@ pipeline {
           docker rm -f ${CONTAINER_NAME} || true
           docker run -d \
             --name ${CONTAINER_NAME} \
+            --network ${NETWORK_NAME} \
             -p 8068:8069 \
             -e DB_HOST=${DB_HOST} \
             -e DB_PORT=${DB_PORT} \
@@ -58,6 +65,15 @@ pipeline {
             ${IMAGE_NAME}
         """
       }
+    }
+  }
+
+  post {
+    success {
+      echo "✅ Deploy thành công!"
+    }
+    failure {
+      echo "❌ Có lỗi xảy ra trong quá trình deploy!"
     }
   }
 }
