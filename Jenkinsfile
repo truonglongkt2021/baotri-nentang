@@ -5,7 +5,6 @@ pipeline {
     IMAGE_NAME = 'odoo-custom:latest'
     CONTAINER_NAME = 'odoo_app_jenkins'
 
-    // Database info
     DB_HOST = '172.17.0.1'
     DB_PORT = '25432'
     DB_USER = 'odoo_test'
@@ -17,7 +16,6 @@ pipeline {
   stages {
     stage('Start PostgreSQL') {
       steps {
-        echo "🚀 Tạo container PostgreSQL"
         sh """
           docker rm -f pg_odoo_jenkins || true
           docker run -d \
@@ -34,57 +32,32 @@ pipeline {
 
     stage('Clone Source') {
       steps {
-        echo "📦 Clone source từ Git"
         checkout scm
       }
     }
 
     stage('Build Docker Image') {
       steps {
-        echo "🐳 Build image Odoo"
         sh "docker build -t ${IMAGE_NAME} ."
-      }
-    }
-
-    stage('Prepare odoo.conf') {
-      steps {
-        echo "📝 Tạo file cấu hình odoo.conf"
-        writeFile file: 'odoo.conf', text: """
-[options]
-addons_path = /opt/odoo/addons
-admin_passwd = ${ADMIN_PASSWD}
-db_host = ${DB_HOST}
-db_port = ${DB_PORT}
-db_user = ${DB_USER}
-db_password = ${DB_PASSWORD}
-db_name = ${DB_NAME}
-logfile = /var/log/odoo/odoo.log
-"""
       }
     }
 
     stage('Deploy Odoo Container') {
       steps {
-        echo "🚀 Khởi chạy container Odoo với cấu hình mount"
         sh """
           docker rm -f ${CONTAINER_NAME} || true
           docker run -d \
             --name ${CONTAINER_NAME} \
             -p 8068:8069 \
-            -v ${env.WORKSPACE}/odoo.conf:/etc/odoo/odoo.conf \
+            -e DB_HOST=${DB_HOST} \
+            -e DB_PORT=${DB_PORT} \
+            -e DB_USER=${DB_USER} \
+            -e DB_PASSWORD=${DB_PASSWORD} \
+            -e DB_NAME=${DB_NAME} \
+            -e ADMIN_PASSWD=${ADMIN_PASSWD} \
             ${IMAGE_NAME}
-          sleep 5
         """
       }
-    }
-  }
-
-  post {
-    failure {
-      echo "❌ Đã xảy ra lỗi trong quá trình deploy."
-    }
-    success {
-      echo "✅ Deploy thành công!"
     }
   }
 }

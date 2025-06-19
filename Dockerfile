@@ -1,3 +1,4 @@
+# Base image
 FROM python:3.10
 
 # Cài dependencies
@@ -18,13 +19,13 @@ RUN useradd -m -U -r -s /bin/bash odoo
 
 WORKDIR /opt/odoo
 COPY . /opt/odoo
+COPY entrypoint.sh /opt/odoo/entrypoint.sh
 
-# Nâng cấp pip và cài requirements
 RUN pip install --upgrade pip && pip install -r requirements.txt
 
-USER root
-RUN mkdir -p /etc/odoo && chown odoo:odoo /etc/odoo
+RUN mkdir -p /etc/odoo && chown odoo:odoo /etc/odoo && \
+    chmod +x /opt/odoo/entrypoint.sh
 
 USER odoo
 
-CMD ["python", "odoo-bin", "-c", "/etc/odoo/odoo.conf"]
+ENTRYPOINT ["/opt/odoo/entrypoint.sh"]
