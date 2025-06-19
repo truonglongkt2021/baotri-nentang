@@ -35,5 +35,8 @@ RUN mkdir -p /etc/odoo && \
 # Chạy bằng user odoo
 USER odoo
 
+COPY odoo.conf.template /odoo.conf.template
+
+
 # Gọi entrypoint script (đã kiểm tra DB và tự quyết định khởi tạo hay không)
 ENTRYPOINT ["/opt/odoo/entrypoint.sh"]
