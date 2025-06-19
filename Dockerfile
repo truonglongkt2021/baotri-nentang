@@ -1,13 +1,13 @@
 # Base image
 FROM python:3.10
 
-# Cài dependencies cần thiết cho Odoo
+# Cài dependencies cần thiết + postgresql-client (chứa pg_isready + psql)
 RUN apt-get update && apt-get install -y \
+    postgresql-client \
     libpq-dev gcc python3-dev \
     libxml2-dev libxslt1-dev libjpeg-dev \
     zlib1g-dev libsasl2-dev libldap2-dev \
-    libffi-dev liblcms2-dev \
-    libblas-dev libatlas-base-dev \
+    libffi-dev liblcms2-dev libblas-dev libatlas-base-dev \
     libjpeg62-turbo-dev libtiff5-dev libfreetype6-dev \
     libwebp-dev libharfbuzz-dev libfribidi-dev \
     libxcb1-dev node-less npm && \
