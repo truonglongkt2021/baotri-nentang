@@ -53,7 +53,7 @@ pipeline {
           docker rm -f ${CONTAINER_NAME} || true
           docker run -d \
             --name ${CONTAINER_NAME} \
-            -p 8069:8069 \
+            -p 8068:8069 \
             ${IMAGE_NAME}
           sleep 5
         """
