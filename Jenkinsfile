@@ -5,7 +5,7 @@ pipeline {
     IMAGE_NAME = 'odoo-custom:latest'
     CONTAINER_NAME = 'odoo_app_jenkins'
 
-    // Thông tin database
+    // Database info
     DB_HOST = '172.17.0.1'
     DB_PORT = '25432'
     DB_USER = 'odoo_test'
@@ -17,7 +17,7 @@ pipeline {
   stages {
     stage('Start PostgreSQL') {
       steps {
-        echo "🚀 Tạo container PostgreSQL cho Odoo"
+        echo "🚀 Tạo container PostgreSQL"
         sh """
           docker rm -f pg_odoo_jenkins || true
           docker run -d \
@@ -46,33 +46,9 @@ pipeline {
       }
     }
 
-    stage('Deploy Odoo Container') {
+    stage('Prepare odoo.conf') {
       steps {
-        echo "🚀 Khởi chạy container Odoo"
-        sh """
-          docker rm -f ${CONTAINER_NAME} || true
-          docker run -d \
-            --name ${CONTAINER_NAME} \
-            -p 8068:8069 \
-            ${IMAGE_NAME}
-          sleep 5
-        """
-      }
-    }
-
-    stage('Inject odoo.conf') {
-      steps {
-        echo "🛠️ Tạo và chép file odoo.conf vào container"
-
-        script {
-          sh """
-            if [ -d "odoo.conf" ]; then
-              echo "⚠️ odoo.conf là thư mục, xóa..."
-              rm -rf odoo.conf
-            fi
-          """
-        }
-
+        echo "📝 Tạo file cấu hình odoo.conf"
         writeFile file: 'odoo.conf', text: """
 [options]
 addons_path = /opt/odoo/addons
@@ -84,16 +60,31 @@ db_password = ${DB_PASSWORD}
 db_name = ${DB_NAME}
 logfile = /var/log/odoo/odoo.log
 """
-
-        sh "docker cp odoo.conf ${CONTAINER_NAME}:/etc/odoo/odoo.conf"
       }
     }
 
-    stage('Restart Odoo with config') {
+    stage('Deploy Odoo Container') {
       steps {
-        echo "🔄 Restart Odoo với file cấu hình mới"
-        sh "docker restart ${CONTAINER_NAME}"
+        echo "🚀 Khởi chạy container Odoo với cấu hình mount"
+        sh """
+          docker rm -f ${CONTAINER_NAME} || true
+          docker run -d \
+            --name ${CONTAINER_NAME} \
+            -p 8068:8069 \
+            -v $(pwd)/odoo.conf:/etc/odoo/odoo.conf \
+            ${IMAGE_NAME}
+          sleep 5
+        """
       }
+    }
+  }
+
+  post {
+    failure {
+      echo "❌ Đã xảy ra lỗi trong quá trình deploy."
+    }
+    success {
+      echo "✅ Deploy thành công!"
     }
   }
 }
