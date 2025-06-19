@@ -1,7 +1,7 @@
 # Base image
 FROM python:3.10
 
-# Cài dependencies cần thiết + postgresql-client (chứa pg_isready + psql)
+# Cài dependencies cần thiết + thêm nano + postgresql-client + gettext (envsubst)
 RUN apt-get update && apt-get install -y \
     postgresql-client \
     libpq-dev gcc python3-dev \
@@ -10,17 +10,19 @@ RUN apt-get update && apt-get install -y \
     libffi-dev liblcms2-dev libblas-dev libatlas-base-dev \
     libjpeg62-turbo-dev libtiff5-dev libfreetype6-dev \
     libwebp-dev libharfbuzz-dev libfribidi-dev \
-    libxcb1-dev node-less npm && \
+    libxcb1-dev node-less npm \
+    nano gettext && \
     npm install -g less less-plugin-clean-css && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Tạo user 'odoo' không cần quyền root
 RUN useradd -m -U -r -s /bin/bash odoo
 
-# Copy source code + entrypoint script
+# Copy source code + cấu hình + entrypoint
 WORKDIR /opt/odoo
 COPY . /opt/odoo
 COPY entrypoint.sh /opt/odoo/entrypoint.sh
+COPY odoo.conf.template /opt/odoo/odoo.conf.template
 
 # Cài Python dependencies
 RUN pip install --upgrade pip && pip install -r requirements.txt

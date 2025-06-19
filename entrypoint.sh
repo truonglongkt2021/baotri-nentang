@@ -2,18 +2,11 @@
 
 echo "🕓 $(date) | Starting Odoo entrypoint on container: $(hostname)"
 
-# Tạo file cấu hình
-echo "[options]" > /etc/odoo/odoo.conf
-echo "addons_path = /opt/odoo/addons" >> /etc/odoo/odoo.conf
-echo "admin_passwd = ${ADMIN_PASSWD}" >> /etc/odoo/odoo.conf
-echo "db_host = ${DB_HOST}" >> /etc/odoo/odoo.conf
-echo "db_port = ${DB_PORT}" >> /etc/odoo/odoo.conf
-echo "db_user = ${DB_USER}" >> /etc/odoo/odoo.conf
-echo "db_password = ${DB_PASSWORD}" >> /etc/odoo/odoo.conf
-echo "db_name = ${DB_NAME}" >> /etc/odoo/odoo.conf
-echo "logfile = /var/log/odoo/odoo.log" >> /etc/odoo/odoo.conf
+# Build odoo.conf từ template
+echo "🛠️ Generating /etc/odoo/odoo.conf from /odoo.conf.template"
+envsubst < /odoo.conf.template > /etc/odoo/odoo.conf
 
-# Chờ PostgreSQL sẵn sàng (tối đa 30 lần, mỗi lần 2s)
+# Chờ PostgreSQL sẵn sàng
 echo "⏳ Waiting for PostgreSQL to be ready..."
 
 MAX_RETRIES=30
@@ -30,7 +23,7 @@ done
 
 echo "✅ PostgreSQL is ready!"
 
-# Kiểm tra database đã tồn tại hay chưa
+# Kiểm tra database đã tồn tại
 echo "🔍 Checking if database '${DB_NAME}' exists..."
 DB_EXISTS=$(PGPASSWORD="$DB_PASSWORD" psql -h "$DB_HOST" -U "$DB_USER" -p "$DB_PORT" -tAc "SELECT 1 FROM pg_database WHERE datname='${DB_NAME}'")
 
