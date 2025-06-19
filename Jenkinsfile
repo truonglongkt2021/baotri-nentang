@@ -71,7 +71,7 @@ logfile = /var/log/odoo/odoo.log
           docker run -d \
             --name ${CONTAINER_NAME} \
             -p 8068:8069 \
-            -v $(pwd)/odoo.conf:/etc/odoo/odoo.conf \
+            -v ${env.WORKSPACE}/odoo.conf:/etc/odoo/odoo.conf \
             ${IMAGE_NAME}
           sleep 5
         """
