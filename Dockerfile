@@ -1,7 +1,7 @@
 # Base image
 FROM python:3.10
 
-# Cài dependencies cần thiết + thêm nano + postgresql-client + gettext (envsubst)
+# Cài dependencies hệ thống + nano + gettext (envsubst) + postgresql-client
 RUN apt-get update && apt-get install -y \
     postgresql-client \
     libpq-dev gcc python3-dev \
@@ -15,28 +15,26 @@ RUN apt-get update && apt-get install -y \
     npm install -g less less-plugin-clean-css && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Tạo user 'odoo' không cần quyền root
+# Tạo user 'odoo' (không phải root)
 RUN useradd -m -U -r -s /bin/bash odoo
 
-# Copy source code + cấu hình + entrypoint
+# Thiết lập thư mục làm việc
 WORKDIR /opt/odoo
+
+# Copy toàn bộ source code và file cấu hình vào container
 COPY . /opt/odoo
-COPY entrypoint.sh /opt/odoo/entrypoint.sh
-COPY odoo.conf.template /opt/odoo/odoo.conf.template
-
-# Cài Python dependencies
-RUN pip install --upgrade pip && pip install -r requirements.txt
-
-# Tạo thư mục cấu hình và cấp quyền
-RUN mkdir -p /etc/odoo && \
-    chown -R odoo:odoo /etc/odoo /opt/odoo && \
-    chmod +x /opt/odoo/entrypoint.sh
-
-# Chạy bằng user odoo
-USER odoo
-
 COPY odoo.conf.template /odoo.conf.template
 
+# Cài Python dependencies (giả định đã có requirements.txt)
+RUN pip install --upgrade pip && pip install -r requirements.txt
 
-# Gọi entrypoint script (đã kiểm tra DB và tự quyết định khởi tạo hay không)
+# Tạo thư mục cấu hình Odoo và cấp quyền cho user odoo
+RUN mkdir -p /etc/odoo && \
+    chown -R odoo:odoo /etc/odoo /opt/odoo /odoo.conf.template && \
+    chmod +x /opt/odoo/entrypoint.sh
+
+# Chạy bằng user 'odoo' để tránh lỗi quyền filestore
+USER odoo
+
+# Gọi entrypoint script (script này sẽ tự kiểm tra DB và init nếu cần)
 ENTRYPOINT ["/opt/odoo/entrypoint.sh"]

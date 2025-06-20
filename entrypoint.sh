@@ -6,6 +6,11 @@ echo "🕓 $(date) | Starting Odoo entrypoint on container: $(hostname)"
 echo "🛠️ Generating /etc/odoo/odoo.conf from /odoo.conf.template"
 envsubst < /odoo.conf.template > /etc/odoo/odoo.conf
 
+# Fix quyền cho thư mục filestore (nếu volume mount từ host)
+echo "🔧 Fixing permissions for Odoo data directory"
+mkdir -p /home/odoo/.local/share/Odoo
+chown -R odoo:odoo /home/odoo/.local/share/Odoo
+
 # Chờ PostgreSQL sẵn sàng
 echo "⏳ Waiting for PostgreSQL to be ready..."
 
